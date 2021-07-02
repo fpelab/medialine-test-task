@@ -11,10 +11,22 @@ $config = [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'modules' => [
+        'v1' => [
+            'class' => 'app\modules\api\v1\Module'
+        ]
+    ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ],
             'cookieValidationKey' => 'DdiuJC_OVmD7oMGF74Oo6IJdNmo5D9Rn',
+        ],
+        'response' => [
+            'on beforeSend' => function(yii\base\Event $event) {
+                \Yii::debug($event->sender);
+            }
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -43,14 +55,17 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
+            'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
-            ],
-        ],
-        */
+                '/' => 'site/index',
+                ['class' => 'app\components\ShortUrlRule'],
+                '<controller:[\w\-]+>/<action:[\w\-]+>' => '<controller>/<action>',
+                require __DIR__ . '/../modules/api/v1/config/urlRule.php'
+            ]
+        ]
     ],
     'params' => $params,
 ];
@@ -61,7 +76,7 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*'],
     ];
 
     $config['bootstrap'][] = 'gii';
